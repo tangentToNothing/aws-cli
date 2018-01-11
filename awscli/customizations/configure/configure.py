@@ -83,6 +83,7 @@ class ConfigureCommand(BasicCommand):
         ('aws_secret_access_key', "AWS Secret Access Key"),
         ('region', "Default region name"),
         ('output', "Default output format"),
+        ('saml_endpoint', "Federated Access URL")
     ]
 
     def __init__(self, session, prompter=None, config_writer=None):
@@ -131,6 +132,9 @@ class ConfigureCommand(BasicCommand):
         if 'aws_secret_access_key' in new_values:
             credential_file_values['aws_secret_access_key'] = new_values.pop(
                 'aws_secret_access_key')
+        if 'saml_endpoint' in new_values:
+            credential_file_values['saml_endpoint'] = new_values.pop(
+                'saml_endpoint')
         if credential_file_values:
             if profile_name is not None:
                 credential_file_values['__section__'] = profile_name
