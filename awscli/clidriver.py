@@ -45,7 +45,7 @@ from awscli.argprocess import unpack_argument
 from awscli.alias import AliasLoader
 from awscli.alias import AliasCommandInjector
 from awscli.utils import emit_top_level_args_parsed_event
-
+from awscli.saml import SessionObtainer, SessionNotStoredException
 
 LOG = logging.getLogger('awscli.clidriver')
 LOG_FORMAT = (
@@ -180,6 +180,13 @@ class CLIDriver(object):
             prog="aws")
         return parser
 
+    def _establish_session(self, session_obtainer):
+        result = session_obtainer.check_session()
+        if result:
+            pass
+        else:
+            raise SessionNotStoredException
+
     def main(self, args=None):
         """
 
@@ -194,6 +201,7 @@ class CLIDriver(object):
         parser = self._create_parser(command_table)
         self._add_aliases(command_table, parser)
         parsed_args, remaining = parser.parse_known_args(args)
+        session_obtainer = SessionObtainer()
         try:
             # Because _handle_top_level_args emits events, it's possible
             # that exceptions can be raised, which should have the same
@@ -204,6 +212,7 @@ class CLIDriver(object):
             HISTORY_RECORDER.record(
                 'CLI_VERSION', self.session.user_agent(), 'CLI')
             HISTORY_RECORDER.record('CLI_ARGUMENTS', args, 'CLI')
+            self._establish_session(session_obtainer)
             return command_table[parsed_args.command](remaining, parsed_args)
         except UnknownArgumentError as e:
             sys.stderr.write("usage: %s\n" % USAGE)
@@ -214,6 +223,11 @@ class CLIDriver(object):
             msg = ('%s You can also configure your region by running '
                    '"aws configure".' % e)
             self._show_error(msg)
+            return 255
+        except SessionNotStoredException as e:
+            msg = ('%s No Valid Session Stored. Please Sign In.' % e)
+            self._show_error(msg)
+            session_obtainer.gather_IdP_response()
             return 255
         except NoCredentialsError as e:
             msg = ('%s. You can configure credentials by running '

@@ -40,6 +40,8 @@ class ClientError(BaseOperationError):
 class ServerError(BaseOperationError):
     pass
 
+class SsoCredentialsError(Exeption):
+    pass
 
 class ErrorHandler(object):
     """

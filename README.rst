@@ -9,12 +9,6 @@ ATTENTION
 
 This repo is a fork of the aws-cli's develop branch as of January 11th, 2018. The purpose of this fork is to establish a standardized SSO method to use the CLI in a federated access situation without provisioning many AWS access and secret key IDs.
 
----------
-ATTENTION
----------
-
-
-
 This package provides a unified command line interface to Amazon Web Services.
 
 The aws-cli package works on Python versions:
